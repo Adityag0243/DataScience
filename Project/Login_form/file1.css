@@ -1,0 +1,123 @@
+*{
+    background-color: #ffffff;
+    margin: 0px;
+    padding: 0px;
+    
+}
+body{
+    padding: 5%;
+    background-image: url(https://images.pexels.com/photos/7233117/pexels-photo-7233117.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1);
+}
+.container{
+    background-color: #fff;
+    display: flex;
+    /*flex-direction: column; */
+    /* height: 75%;
+    width: 40%; */
+    
+    height:600px;
+    width:100%;
+    border: 1px solid #ffffff;
+    justify-content: space-between;
+    
+}
+.box{
+    /* height: 75%;
+    width: 40%; */
+    margin: 1%;
+    height: 550px;
+    width: 950px;
+    border: 1px solid #ffffff;
+}
+.mid{
+    display: flex;
+    flex-direction: column;
+    /* justify-content: space-between; */
+    background-color: hsl(0, 0%, 100%);
+    margin: 1%;
+    height: 550px;
+    width: 450px;
+    border: 1px solid rgb(203, 201, 201);
+}
+
+
+.mbox{
+    margin: 1px;
+    height: 150px;
+    width: 440px;
+    border: 1px solid rgb(255, 255, 255);
+    
+    /* background-color: red; /* For browsers that do not support gradients */
+    /* background-image: linear-gradient(to right, red , yellow); */ 
+}
+.m1{
+    text-align: center;
+    font-size: 25px;
+    margin: 1px;
+    height: 30px;
+    width: 440px;
+    border: 1px solid rgb(249, 249, 249);
+}
+.m2{
+    margin-top: 6px;
+    
+}
+#img{
+    width: 150px;
+    border: 1px solid rgb(255, 255, 255);
+    margin-left: 35%;
+    
+    /* align-items: center; */
+}
+.m3{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 1px;
+    height: 200px;
+    width: 440px;
+    border: 1px solid rgb(255, 255, 255);
+}
+
+.m3box{
+    margin: 1px;
+    height: 70px;
+    width: 230px;
+    border: 1px solid rgb(255, 255, 255);
+    gap: 10px;
+}
+.m3box1{
+    margin: 1px;
+    height: 50px;
+    width: 100px;
+    margin-left: 25%;  
+}
+
+input {
+    padding: 12px 20px;
+    margin: 6px 0;
+    /* display: inline-block; */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+input[type=submit]{
+    color: #fff;
+    font-size: 15px;
+    /* background-color: #327035; */
+    background-image: linear-gradient(to right,#65b869,#2a5e2c,#2c8530);
+}
+
+
+
+
+.m4{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.m4box{
+    font-size: 17px;
+    width:fit-content;
+    border: 1px solid rgb(255, 255, 255);
+}
