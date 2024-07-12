@@ -1,0 +1,726 @@
+
+-- CONSTRAINTS
+PRIMARY KEY -- Make sure that the column does not have null values and is always having unique records
+FOREIGN KEY -- Build parent child relationship
+NOT NULL -- Define a column as not null if you never want to have null values in it.
+CHECK -- Validates with the given list of values
+UNIQUE -- Avoid duplicate values. But it allows NULL values.
+IDENTITY column -- Auto generates column values
+
+-----------------------------------------------------------------------------------------------------------
+
+*****Defining a single-column primary key*****
+----------
+Example 1:
+----------
+create table employee(
+id int primary key,
+name varchar(50)
+);
+
+insert into employee
+values(1,"abc"),
+(2,"xyz");
+
+select * from employee;
+----------
+Example 2:
+----------
+CREATE TABLE products(
+   id INT PRIMARY KEY,
+   name VARCHAR(255) NOT NULL
+);
+
+INSERT INTO products (id, name) 
+VALUES 
+    (1, 'Laptop'),
+    (2, 'Smartphone'),
+    (3, 'Wireless Headphones');
+
+If you attempt to insert a duplicate value into the primary key column, you’ll get an error. For example:
+
+INSERT INTO products (id, name) 
+VALUES 
+  (1, 'Bluetooth Speaker');
+
+
+---------------------------------------------------------------------------------------------------------
+
+***** Defining a single-column primary key with AUTO_INCREMENT attribute example*****
+
+---------
+Example 1:
+---------
+
+DROP TABLE products; 
+
+CREATE TABLE products(
+   id INT AUTO_INCREMENT PRIMARY KEY,
+   name VARCHAR(255) NOT NULL
+);
+
+
+INSERT INTO products (name) 
+VALUES 
+    ('Laptop'),
+    ('Smartphone'),
+    ('Wireless Headphones');
+	
+SELECT * FROM products;
+
+---------------------------------------------------------------------------------------------------
+
+***** Defining a multi-column primary key example*****
+
+----------
+Example 1:
+----------
+
+CREATE TABLE faviorites(
+    customer_id INT,
+    product_id INT,
+    favorite_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY(customer_id, product_id)
+);
+
+
+insert into faviorites
+values(1,1,CURRENT_TIMESTAMP);
+
+select * from faviorites;
+
+insert into faviorites
+values(1,2,CURRENT_TIMESTAMP);
+
+-------------------------------------------------------------------------------------------------
+
+***** Adding a primary key to a table example*****
+
+----------
+Example 1:
+----------
+
+CREATE TABLE tags(
+    id INT,
+    name VARCHAR(25) NOT NULL
+);
+
+To make the id column the primary key, you use the ALTER TABLE ... ADD PRIMARY KEY statement:
+
+ALTER TABLE tags
+ADD PRIMARY KEY(id);
+
+
+---------------------------------------------------------------------------------------------------
+
+***** Removing the primary key from a table*****
+
+
+ALTER TABLE tags
+DROP PRIMARY KEY;
+
+
+-----------------------------------------------------------------------------------------------------
+
+***** MySQL FOREIGN KEY examples*****
+
+Let’s create a new database called fkdemo for the demonstration.
+
+CREATE DATABASE fkdemo;
+
+USE fkdemo;
+
+-------------------------------
+1) RESTRICT & NO ACTION actions
+-------------------------------
+
+Inside the fkdemo database, create two tables categories and products
+
+CREATE TABLE categories(
+  categoryId INT AUTO_INCREMENT PRIMARY KEY, 
+  categoryName VARCHAR(100) NOT NULL
+) ENGINE = INNODB;
+CREATE TABLE products(
+  productId INT AUTO_INCREMENT PRIMARY KEY, 
+  productName VARCHAR(100) NOT NULL, 
+  categoryId INT, 
+  CONSTRAINT fk_category FOREIGN KEY (categoryId) 
+                         REFERENCES categories(categoryId)
+);
+
+
+The categoryId in the products table is the foreign key column that refers to the categoryId column in the  categories table.
+
+Because we don’t specify any ON UPDATE and ON DELETE clauses, the default action is RESTRICT for both update and delete operations.
+
+The following steps illustrate the RESTRICT action.
+
+1) Insert two rows into the categories table:
+
+INSERT INTO categories(categoryName)
+VALUES
+    ('Smartphone'),
+    ('Smartwatch');
+	
+2) Select data from the categories table:
+
+SELECT * FROM categories;
+
+3) Insert a new row into the products table:
+
+INSERT INTO products(productName, categoryId)
+VALUES('iPhone',1);
+
+It works because the categoryId 1 exists in the categories table.
+
+4) Attempt to insert a new row into the products table with a categoryId  value does not exist in the categories table:
+
+INSERT INTO products(productName, categoryId)
+VALUES('iPad',3);
+
+5) Update the value in the categoryId column in the categories table to 100:
+
+
+-------------------------------------
+2) CASCADE action
+------------------------------------
+
+1) Drop the products table:
+
+DROP TABLE products;
+
+2) Create the products table with the ON UPDATE CASCADE and ON DELETE CASCADE options for the foreign key:
+
+CREATE TABLE products(
+    productId INT AUTO_INCREMENT PRIMARY KEY,
+    productName varchar(100) not null,
+    categoryId INT NOT NULL,
+    CONSTRAINT fk_category
+    FOREIGN KEY (categoryId) 
+    REFERENCES categories(categoryId)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+);
+
+3) Insert four rows into the products table:
+
+INSERT INTO products(productName, categoryId)
+VALUES
+    ('iPhone', 1), 
+    ('Galaxy Note',1),
+    ('Apple Watch',2),
+    ('Samsung Galary Watch',2);
+	
+4) Select data from the products table:
+
+SELECT * FROM products;
+
+5) Update categoryId 1 to 100 in the categories table:
+
+UPDATE categories
+SET categoryId = 100
+WHERE categoryId = 1;
+
+6) Verify the update:
+
+SELECT * FROM categories;
+
+7) Get data from the products table:
+
+SELECT * FROM products;
+
+As you can see, two rows with value 1 in the categoryId column of the products table was automatically updated to 100 because of the ON UPDATE CASCADE action.
+
+8) Delete categoryId 2 from the categories table:
+
+DELETE FROM categories
+WHERE categoryId = 2;
+
+9) Verify the deletion:
+
+SELECT * FROM categories;
+
+10) Check the products table:
+
+SELECT * FROM products;
+
+All products with categoryId 2 from the products table was automatically deleted because of the ON DELETE CASCADE action.
+
+-------------------------------
+3) SET NULL action
+-------------------------------
+
+
+1) Drop both categories and products tables:
+
+DROP TABLE IF EXISTS categories;
+DROP TABLE IF EXISTS products;
+
+2) Create the categories and products tables:
+
+CREATE TABLE categories(
+    categoryId INT AUTO_INCREMENT PRIMARY KEY,
+    categoryName VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE products(
+    productId INT AUTO_INCREMENT PRIMARY KEY,
+    productName varchar(100) not null,
+    categoryId INT,
+    CONSTRAINT fk_category
+    FOREIGN KEY (categoryId) 
+        REFERENCES categories(categoryId)
+        ON UPDATE SET NULL
+        ON DELETE SET NULL 
+);
+
+The foreign key in the products table changed to ON UPDATE SET NULL and ON DELETE SET NULL options.
+
+3) Insert rows into the categories table:
+
+INSERT INTO categories(categoryName)
+VALUES
+    ('Smartphone'),
+    ('Smartwatch');
+	
+4) Insert rows into the products table:
+
+INSERT INTO products(productName, categoryId)
+VALUES
+    ('iPhone', 1), 
+    ('Galaxy Note',1),
+    ('Apple Watch',2),
+    ('Samsung Galary Watch',2);
+	
+5) Update categoryId from 1 to 100 in the categories table:
+
+	UPDATE categories
+SET categoryId = 100
+WHERE categoryId = 1;
+
+6) Verify the update:
+
+SELECT * FROM categories;
+
+7) Select data from the products table:
+The rows with the categoryId 1 in the products table was automatically set to NULL due to the ON UPDATE SET NULL action.
+
+8) Delete the categoryId 2 from the categories table:
+
+DELETE FROM categories 
+WHERE categoryId = 2;
+
+9) Check the products table:
+
+SELECT * FROM products;
+
+The values in the categoryId column of the rows with categoryId 2 in the products table was automatically set to NULL due to the ON DELETE SET NULL action.
+
+------------------------------------
+Drop MySQL foreign key constraints
+------------------------------------
+
+To drop a foreign key constraint, you use the ALTER TABLE statement:
+
+ALTER TABLE table_name 
+DROP FOREIGN KEY constraint_name;
+
+To obtain the generated constraint name of a table, you use the SHOW CREATE TABLE statement:
+
+SHOW CREATE TABLE table_name;
+
+Example: SHOW CREATE TABLE products;
+
+-------------------------------------------------------------------------------------------------------------------
+
+*****MySQL UNIQUE constraint example*****
+----
+First, creates a new table named suppliers with the two UNIQUE constraints:
+----
+
+CREATE TABLE suppliers (
+    supplier_id INT AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    phone VARCHAR(15) NOT NULL UNIQUE,
+    address VARCHAR(255) NOT NULL,
+    PRIMARY KEY (supplier_id),
+    CONSTRAINT uc_name_address UNIQUE (name,address)
+);
+
+
+
+INSERT INTO suppliers(name, phone, address) 
+VALUES( 'ABC Inc', 
+       '(408)-908-2476',
+       '4000 North 1st Street');
+	   
+----
+Lets attempt to insert a different supplier but has the phone number that already exists in the suppliers table.
+----
+
+INSERT INTO suppliers(name, phone, address) 
+VALUES( 'XYZ Corporation','(408)-908-2476','3000 North 1st Street');
+
+-----
+Lets change the phone number to a different one and execute the insert statement again.
+-----
+
+INSERT INTO suppliers(name, phone, address) 
+VALUES( 'XYZ Corporation','(408)-908-3333','3000 North 1st Street');
+
+
+insert a row into the suppliers table with values that already exist in the columns name and address :
+
+
+INSERT INTO suppliers(name, phone, address) 
+VALUES( 'ABC Inc', 
+       '(408)-908-1111',
+       '4000 North 1st Street');
+	   
+
+*****MySQL UNIQUE constraint & NULL*****
+
+------
+create a new table called contacts:
+------
+
+CREATE TABLE contacts(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    phone VARCHAR(20) UNIQUE
+)
+
+-----
+The contacts table has a phone column with a UNIQUE constraint. Also, the phone column can accept NULL values.
+-----
+
+INSERT INTO contacts(name, phone)
+VALUES
+   ('Alice','(408)-102-2456'),
+   ('John', NULL),
+   ('Jane', NULL);  
+   
+   
+SELECT * FROM contacts;
+
+*****MySQL UNIQUE constraints and indexes*****
+
+----
+A SQL index is used to retrieve data from a database very fast
+
+
+When you define a unique constraint for a column or a group of columns, MySQL creates a corresponding UNIQUE index and uses this index to enforce the rule.
+----
+----
+The SHOW CREATE TABLE statement shows the definition of the suppliers table:
+----
+
+SHOW CREATE TABLE suppliers;
+
+----
+The output indicates that MySQL created two UNIQUE indexes on the suppliers table: phone and uc_name_address.
+
+The following SHOW INDEX statement displays all indexes associated with the suppliers table.
+-----
+
+SHOW INDEX FROM suppliers;
+
+
+*****Drop a unique constraint*****
+
+----
+To drop a UNIQUE constraint, you can use DROP INDEX or ALTER TABLE statement:
+----
+
+DROP INDEX index_name ON table_name;
+
+or 
+
+ALTER TABLE table_name
+DROP INDEX index_name;
+
+
+DROP INDEX uc_name_address ON suppliers;
+
+
+SHOW INDEX FROM suppliers;
+
+
+*****Add new unique constraint*****
+
+-----
+The following ALTER TABLE ADD CONSTRAINT adds a unique constraint to a column of an existing table:
+-----
+
+ALTER TABLE table_name
+ADD CONSTRAINT constraint_name 
+UNIQUE (column_list);
+
+-----
+This statement adds a UNIQUE constraint uc_name_address back to the suppliers table:
+-----
+
+ALTER TABLE suppliers
+ADD CONSTRAINT uc_name_address 
+UNIQUE (name,address);
+
+-----
+This statement adds a UNIQUE constraint uc_name_address back to the suppliers table:
+-----
+
+ALTER TABLE suppliers
+ADD CONSTRAINT uc_name_address 
+UNIQUE (name,address);
+
+----------------------------------------------------------------------------------------------------------------------------
+
+*****MySQL NOT NULL Constraint*****
+
+-----
+For example, the following creates the tasks table using the CREATE TABLE statement:
+-----
+
+CREATE TABLE tasks (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE
+);
+-----
+
+In the tasks table, we explicitly define the title and start_date columns with NOT NULL constraints.
+
+The id column has the PRIMARY KEY constraint, therefore, it implicitly includes a NOT NULL constraint.
+
+The end_date column can have NULL values, as when creating a new task, you may not know its completion date
+
+-----
+
+
+-----
+The following shows the structure of the tasks table:
+-----
+
+DESC tasks;
+
+
+
+*****Adding a NOT NULL constraint to an existing column*****
+
+-----
+Typically, you add NOT NULL constraints to columns when you create the table. However, you may want to add a NOT NULL constraint to a column of an existing table. In this case, you use the following steps:
+
+First, check the current values of the column if there are any NULL values.
+Second, update the NULL to non-NULL.
+Third, modify the column with a NOT NULL constraint.
+-----
+
+
+INSERT INTO tasks(title ,start_date, end_date)
+VALUES('Learn MySQL NOT NULL constraint', '2017-02-01','2017-02-02'),
+      ('Check and update NOT NULL constraint to your database', '2017-02-01',NULL);
+	  
+If you want to require users to provide an estimated end date when creating a new task, you can add a NOT NULL constraint to the end_date column of the tasks table.
+
+Second, find rows with NULLs in the column end_date using the IS NULL operator:
+
+SELECT * FROM tasks 
+WHERE end_date IS NULL;
+
+ update the NULL values to non-null values. In this case, you can create a rule that sets to one week after the start date when the end_date is NULL.
+ 
+UPDATE tasks 
+SET 
+    end_date = start_date + 7
+WHERE
+    end_date IS NULL;
+	
+SELECT * FROM tasks;
+
+add a NOT NULL constraint to the end_date column using the following ALTER TABLE statement:
+
+ALTER TABLE table_name
+CHANGE 
+   old_column_name 
+   new_column_name column_definition;
+   
+In this case, the name of the old and new column names are the same except that the column must have a NOT NULL constraint:
+
+ALTER TABLE tasks 
+CHANGE 
+    end_date 
+    end_date DATE NOT NULL;
+
+DESC tasks;
+
+Removing a NOT NULL constraint
+
+To drop a NOT NULL constraint for a column, you use the ALTER TABLE..MODIFY statement:
+
+ALTER TABLE table_name
+MODIFY column_name column_definition;
+
+ALTER TABLE tasks 
+MODIFY end_date DATE;
+
+DESC tasks;
+
+--------------------------------------------------------------------------------------------------------------------------
+
+MySQL DEFAULT constraint example
+
+
+CREATE TABLE cart_items 
+(
+    item_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    quantity INT NOT NULL,
+    price DEC(5,2) NOT NULL,
+    sales_tax DEC(5,2) NOT NULL DEFAULT 0.1,
+    CHECK(quantity > 0),
+    CHECK(sales_tax >= 0) 
+);
+
+The sales_tax column has a default value 0.1 (10%). The following statement shows the cart_items table:
+
+DESC cart_items;
+
+INSERT INTO cart_items(name, quantity, price)
+VALUES('Keyboard', 1, 50);
+
+SELECT * FROM cart_items;
+
+INSERT INTO cart_items(name, quantity, price, sales_tax)
+VALUES('Battery',4, 0.25 , DEFAULT);
+
+SELECT * FROM cart_items;
+
+Adding a DEFAULT constraint to a column
+
+To add a default constraint to a column of an existing table, you use the ALTER TABLE statement:
+
+ALTER TABLE table_name
+ALTER COLUMN column_name SET DEFAULT default_value;
+
+The following example adds a DEFAULT constraint to the quantity column of the cart_itesm table:
+
+ALTER TABLE cart_items
+ALTER COLUMN quantity SET DEFAULT 1;
+
+DESC cart_items;
+
+The following statement inserts a new row into the cart_items table without specifying a value for the quantity column:
+
+INSERT INTO cart_items(name, price, sales_tax)
+VALUES('Maintenance services',25.99, 0)
+
+SELECT * FROM cart_items;
+
+Removing a DEFAULT constraint from a column
+
+To remove a DEFAULT constraint from a column, you use the ALTER TABLE statement:
+
+ALTER TABLE table_name
+ALTER column_name DROP DEFAULT;
+
+The following example removes the DEFAULT constraint from the quantity column of the cart_items table:
+
+ALTER TABLE cart_items
+ALTER COLUMN quantity DROP DEFAULT;
+
+DESC cart_items;
+
+----------------------------------------------------------------------------------------------------------------------
+
+*****MySQL CHECK Constraint*****
+
+
+-----------------------------------------
+1) Creating CHECK constraints as column constraints
+-----------------------------------------
+
+CREATE TABLE parts (
+    part_no VARCHAR(18) PRIMARY KEY,
+    description VARCHAR(40),
+    cost DECIMAL(10,2 ) NOT NULL CHECK (cost >= 0),
+    price DECIMAL(10,2) NOT NULL CHECK (price >= 0)
+);
+
+
+To view the table definition with the CHECK constraint name, you use the SHOW CREATE TABLE statement:
+
+
+SHOW CREATE TABLE parts;
+
+INSERT INTO parts(part_no, description,cost,price) 
+VALUES('A-001','Cooler',0,-100);
+
+
+-------------------------------------	
+2) Creating CHECK constraints as a table constraints
+-------------------------------------
+
+DROP TABLE IF EXISTS parts;
+
+CREATE TABLE parts (
+    part_no VARCHAR(18) PRIMARY KEY,
+    description VARCHAR(40),
+    cost DECIMAL(10,2 ) NOT NULL CHECK (cost >= 0),
+    price DECIMAL(10,2) NOT NULL CHECK (price >= 0),
+    CONSTRAINT parts_chk_price_gt_cost 
+        CHECK(price >= cost)
+);
+
+
+The following new clause defines a table CHECK constraint that ensures the price is always greater than or equal to the cost:
+
+
+SHOW CREATE TABLE parts;
+
+INSERT INTO parts(part_no, description,cost,price) 
+VALUES('A-001','Cooler',200,100);
+
+
+Adding a check constraint to a table
+
+
+To add a check constraint to an existing table, you use the ALTER TABLE ... ADD CHECK statement:
+
+
+ALTER TABLE table_name
+ADD CHECK (expression);
+
+
+If you want to explicitly specify the name of the CHECK constraint, you can use the ALTER TABLE ... ADD CONSTRAINT ... CHECK statement:
+
+ALTER TABLE table_name
+ADD CONSTRAINT contraint_name
+CHECK (expression);
+
+For example, the following statement adds a CHECK constraint to the parts table:
+
+ALTER TABLE parts
+ADD CHECK (part_no <> description);
+
+
+This CHECK constraint prevents you from having the part_no identical to the description
+
+
+INSERT INTO parts 
+VALUES('A','A',100,120);
+
+
+Removing a check constraint from a table
+
+To remove a CHECK constraint from a table, you use the ALTER TABLE ... DROP CHECK statement:
+
+ALTER TABLE table_name
+DROP CHECK constraint_name;
+
+For example, the following statement removes the CHECK constraint parts_chk_3 from the parts table:
+
+ALTER TABLE parts
+DROP CHECK parts_chk_3;
+
+
+-----------------------------------------------------------------------------------------------------------------------------
