@@ -178,6 +178,31 @@ modify admission_no int;
 alter table class
 drop primary key;
 
+alter table class
+modify admission_no restrict;
+
+
+describe admission;
+describe class;
+
+
+
+
+-- alter table class
+-- drop  foreign key primary key ;
+
+ALTER TABLE class
+DROP FOREIGN KEY primary key;
+
+
+
+
+
+
+
+
+
+
 ALTER TABLE class DROP PRIMARY KEY;
 
 

@@ -1,0 +1,302 @@
+*****MySQL Arithmetic Operators*****
+
+---------
+Examples
+---------
+
+create database deldb;
+use deldb;
+CREATE TABLE sales (
+    sale_id INT PRIMARY KEY,
+    product_id INT,
+    quantity INT,
+    price_per_unit DECIMAL(10, 2),
+    discount DECIMAL(10, 2)
+);
+
+select * from sales;
+
+
+INSERT INTO sales (sale_id, product_id, quantity, price_per_unit, discount) VALUES
+(1, 101, 10, 15.00, 2.00),
+(2, 102, 5, 25.00, 5.00),
+(3, 103, 8, 30.00, 3.00),
+(4, 104, 3, 45.00, 4.50);
+
+
+
+-- Calculate the total revenue before discount for each sale.
+SELECT sale_id, (quantity * price_per_unit) AS total_revenue_before_discount
+FROM sales;
+
+-- Calculate the net revenue after applying the discount.
+SELECT sale_id, (quantity * price_per_unit - discount) AS net_revenue
+FROM sales;
+
+-- Calculate the total revenue before discount.
+SELECT sale_id, quantity, price_per_unit, (quantity * price_per_unit) AS total_revenue_before_discount
+FROM sales;
+
+-- Calculate the average price per unit for each sale after discount.
+SELECT sale_id, quantity, price_per_unit, discount, ((quantity * price_per_unit - discount) / quantity) AS average_price_per_unit_after_discount
+FROM sales;
+
+-- Find out which sales have an odd quantity
+SELECT sale_id, quantity
+FROM sales
+WHERE quantity % 2 != 0;
+
+
+---------------------------------------------------------------------------------------------------------------------------
+
+*****MySQL Bitwise Operators*****
+
+CREATE TABLE user_permissions (
+    user_id INT PRIMARY KEY,
+    permissions INT
+);
+
+
+INSERT INTO user_permissions (user_id, permissions) VALUES
+(1, 1),  -- Read
+(2, 2),  -- Write
+(3, 4),  -- Execute
+(4, 8),  -- Delete
+(5, 3),  -- Read and Write
+(6, 7),  -- Read, Write, and Execute
+(7, 15); -- All permissions (Read, Write, Execute, Delete)
+
+select * from user_permissions;
+
+-- Find users who have the "Read" permission.
+SELECT user_id, permissions, (permissions & 1) AS has_read_permission
+FROM user_permissions
+WHERE (permissions & 1) = 1;
+
+-- Add the "Delete" permission to all users who have the "Write" permission.
+
+UPDATE user_permissions
+SET permissions = permissions | 8
+WHERE (permissions & 2) = 2;
+
+-- Toggle the "Execute" permission for a specific user (user_id = 5).
+UPDATE user_permissions
+SET permissions = permissions ^ 4
+WHERE user_id = 5;
+
+-----------------------------------------------------------------------------------------------------------
+
+*****MySQL Comparison Operators*****
+
+CREATE TABLE products (
+    product_id INT PRIMARY KEY,
+    product_name VARCHAR(50),
+    price DECIMAL(10, 2),
+    quantity INT
+);
+
+INSERT INTO products (product_id, product_name, price, quantity) VALUES
+(1, 'Laptop', 1200.00, 10),
+(2, 'Mouse', 25.00, 100),
+(3, 'Keyboard', 45.00, 50),
+(4, 'Monitor', 300.00, 20),
+(5, 'Headphones', 150.00, 75);
+
+select * from products;
+
+-- Find the product with the exact price of $300.00.
+SELECT product_id, product_name, price
+FROM products
+WHERE price = 300.00;
+
+-- Find all products priced above $100.00.
+SELECT product_id, product_name, price
+FROM products
+WHERE price > 100.00;
+
+-- Find all products priced below $50.00.
+SELECT product_id, product_name, price
+FROM products
+WHERE price < 50.00;
+
+-- Find all products priced at least $150.00.
+SELECT product_id, product_name, price
+FROM products
+WHERE price >= 150.00;
+
+-- Find all products priced at most $45.00.
+SELECT product_id, product_name, price
+FROM products
+WHERE price <= 45.00;
+
+-- Find all products not priced at $25.00.
+SELECT product_id, product_name, price
+FROM products
+WHERE price <> 25.00;
+
+
+------------------------------------------------------------------------------------------------------------
+
+*****MySQL Logical Operators*****
+
+CREATE TABLE products (
+    product_id INT PRIMARY KEY,
+    product_name VARCHAR(50),
+    price DECIMAL(10, 2),
+    quantity INT,
+    category VARCHAR(50)
+);
+
+
+INSERT INTO products (product_id, product_name, price, quantity, category) VALUES
+(1, 'Laptop', 1200.00, 10, 'Electronics'),
+(2, 'Mouse', 25.00, 100, 'Accessories'),
+(3, 'Keyboard', 45.00, 50, 'Accessories'),
+(4, 'Monitor', 300.00, 20, 'Electronics'),
+(5, 'Headphones', 150.00, 75, 'Accessories'),
+(6, 'Desk', 200.00, 5, 'Furniture'),
+(7, 'Chair', 85.00, 15, 'Furniture');
+
+---------------------
+ALL: TRUE if all of the subquery values meet the condition
+
+It is used to compare a value to all value in a list or subquery.
+---------------------
+Find products whose price is greater than all products in the 'Accessories' category.
+
+SELECT product_name, price
+FROM products
+WHERE price > ALL (SELECT price FROM products WHERE category = 'Accessories');
+
+---------------------
+AND: TRUE if all the conditions separated by AND is TRUE
+---------------------
+
+Find products that are in the 'Electronics' category and have a price greater than $500.
+
+SELECT product_name, price
+FROM products
+WHERE category = 'Electronics' AND price > 500;
+
+----------------------
+ANY: TRUE if any of the subquery values meet the condition
+
+It is used to compare a value to any value in a list or subquery.
+----------------------
+Find products whose price is greater than any product in the 'Furniture' category.
+
+SELECT product_name, price
+FROM products
+WHERE price > ANY (SELECT price FROM products WHERE category = 'Furniture');
+
+----------------------
+BETWEEN: TRUE if the operand is within the range of comparisons
+----------------------
+
+Find products with a price between $50 and $300.
+
+SELECT product_name, price
+FROM products
+WHERE price BETWEEN 50 AND 300;
+
+-----------------------
+EXISTS: TRUE if the subquery returns one or more records
+
+The EXISTS operator is used to check if a subquery returns any rows. If the subquery returns one or more 
+rows, EXISTS returns TRUE. If the subquery returns no rows, EXISTS returns FALSE
+
+The EXISTS operator is typically used to check for the existence of records that meet certain criteria 
+in a subquery
+-----------------------
+
+CREATE TABLE customers (
+    customer_id INT PRIMARY KEY,
+    customer_name VARCHAR(50)
+);
+
+INSERT INTO customers (customer_id, customer_name) VALUES
+(1, 'Alice'),
+(2, 'Bob'),
+(3, 'Charlie'),
+(4, 'Diana');
+
+CREATE TABLE orders (
+    order_id INT PRIMARY KEY,
+    customer_id INT,
+    order_date DATE,
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+);
+
+INSERT INTO orders (order_id, customer_id, order_date) VALUES
+(1, 1, '2024-07-01'),
+(2, 3, '2024-07-02'),
+(3, 1, '2024-07-03');
+
+ Find all customers who have placed at least one order.
+ 
+ SELECT customer_name
+FROM customers c
+WHERE EXISTS (
+    SELECT 1 
+    FROM orders o 
+    WHERE o.customer_id = c.customer_id
+);
+
+
+-------------------------
+IN: TRUE if the operand is equal to one of a list of expressions
+-------------------------
+
+Find products that belong to the categories 'Electronics' or 'Furniture'.
+
+SELECT product_name, price
+FROM products
+WHERE category IN ('Electronics', 'Furniture');
+
+--------------------------
+LIKE: TRUE if the operand matches a pattern
+--------------------------
+
+Find products with names that start with 'M'.
+
+SELECT product_name, price
+FROM products
+WHERE product_name LIKE 'M%';
+
+---------------------------
+NOT: Displays a record if the condition(s) is NOT TRUE
+---------------------------
+
+Find products that are not in the 'Accessories' category.
+
+SELECT product_name, price
+FROM products
+WHERE category NOT IN ('Accessories');
+
+----------------------------
+OR: TRUE if any of the conditions separated by OR is TRUE
+----------------------------
+Find products that are either in the 'Electronics' category or have a price greater than $200.
+
+SELECT product_name, price
+FROM products
+WHERE category = 'Electronics' OR price > 200;
+
+----------------------------
+SOME: TRUE if any of the subquery values meet the condition
+
+Purpose: The ANY and SOME operators return TRUE if any one of the values returned 
+by the subquery satisfies the condition. 
+In practice, ANY and SOME are synonymous and can be used interchangeably.
+Usage: They are used to compare a value to any value in a list or subquery.
+----------------------------
+
+Find products whose price is greater than some of the products in the 'Accessories' category.
+
+SELECT product_name, price
+FROM products
+WHERE price > SOME (SELECT price FROM products WHERE category = 'Accessories');
+
+
+
+
