@@ -101,11 +101,18 @@ describe department;   -- varchar 255
 
 
 select * from employee;
-
 alter table employee
-add column salary int
+add column salary int;
 -- ID    empl_name     email  salary
 -- 3	Alice Johnson  null   null   (this data is already present)
+-- after adding value we can do modification
+SET sql_safe_updates = 0;
+update employee
+set salary=salary*1.1
+where (select department_name from department where department.EmployeeID=employee.EmployeeID)='IT';
+
+
+
 
 
 
