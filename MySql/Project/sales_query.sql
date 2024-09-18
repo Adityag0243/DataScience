@@ -22,11 +22,74 @@ FROM item;
 -- we will use this connection to get category from items(i_category) and total sales revenue from store_sales(ss_net_paid)
 -- The net amount paid by the customer, which is the total amount after applying discounts, taxes, and coupons.
 
-select item.i_category as product_category , sum(store_sales.ss_net_paid) AS total_sale
+select item.i_category as product_category , sum(store_sales.ss_net_paid)/1000000 AS total_sale_in_million
 from store_sales
 inner join item on store_sales.ss_item_sk = item.i_item_sk
 group by item.i_category;
+-- product_category   total_sale_in_million
+-- Music	493.222405
+-- Women	470.922820
+-- Home	471.405004
+-- Children	466.745198
+-- Men	468.657349
+-- Electronics	473.761573
+-- Jewelry	461.504370
+-- Sports	471.387326
+-- Books	466.346603
+-- Shoes	484.970859
 
+
+
+-- for year 2002 store_sales
+select item.i_category as product_category , sum(store_sales.ss_net_paid)/1000000 AS total_sale_in_million
+from store_sales
+inner join item on store_sales.ss_item_sk = item.i_item_sk
+inner join date_dim on store_sales.ss_sold_date_sk = date_dim.d_date_sk
+WHERE YEAR(date_dim.d_date) = 2002
+group by item.i_category;
+
+
+-- Music	94.823250
+-- Home	94.165996
+-- Men	91.520923
+-- Children	92.349163
+-- Women	92.376012
+-- Jewelry	87.211684
+-- Sports	91.680945
+-- Books	89.585516
+-- Electronics	94.303832
+-- Shoes	92.571945
+
+-- for year 2002 web_store
+select item.i_category as product_category , sum(web_sales.ws_net_paid)/1000000 AS total_sale_in_million
+from web_sales
+inner join item on web_sales.ws_item_sk = item.i_item_sk
+inner join date_dim on web_sales.ws_sold_date_sk = date_dim.d_date_sk
+WHERE YEAR(date_dim.d_date) = 2002
+group by item.i_category;
+
+-- Music	32.592532
+-- Home	33.475020
+-- Men	32.973695
+-- Children	32.648308
+-- Women	33.100864
+-- Jewelry	30.319478
+
+
+-- for year 2002 for catalog_sales
+select item.i_category as product_category , sum(catalog_sales.cs_net_paid)/1000000 AS total_sale_in_million
+from catalog_sales
+inner join item on catalog_sales.cs_item_sk = item.i_item_sk
+inner join date_dim on catalog_sales.cs_sold_date_sk = date_dim.d_date_sk
+WHERE YEAR(date_dim.d_date) = 2002
+group by item.i_category;
+
+-- Music	67.074700
+-- Home	66.403402
+-- Men	65.759645
+-- Children	66.075390
+-- Women	65.769786
+-- Jewelry	61.567413
 
 
 -- 2. Sales Trend Over Time:
@@ -35,12 +98,53 @@ group by item.i_category;
 -- considering year 2001 and 2002   as sales table have data till 2002 only...
 
 
-select month(date_dim.d_date) as month_no  , sum(store_sales.ss_net_paid) AS total_sale
+select month(date_dim.d_date) as month_no  , sum(store_sales.ss_net_paid)/1000000 AS total_sale_in_million
 from store_sales
 inner join date_dim on store_sales.ss_sold_date_sk = date_dim.d_date_sk
 WHERE YEAR(date_dim.d_date) in (2001,2002)
 group by month(date_dim.d_date)
-order by month_no;
+order by  total_sale_in_million desc;
+-- month_no total_sales
+-- 12	313.177924
+-- 11	293.978184
+-- 10	209.322266
+-- 8	198.530944
+-- 9	197.793935
+-- 1	105.438511
+-- 5	89.670216
+-- 7	89.597997
+-- 6	87.639703
+-- 4	87.469422
+-- 3	86.231279
+-- 2	81.387968
+
+select month(date_dim.d_date) as month_no  , sum(web_sales.ws_net_paid)/1000000 AS total_sale_in_million
+from web_sales
+inner join date_dim on web_sales.ws_sold_date_sk = date_dim.d_date_sk
+WHERE YEAR(date_dim.d_date) in (2001,2002)
+group by month(date_dim.d_date)
+order by  total_sale_in_million desc;
+ -- top 4 months 
+-- 12	114.168656
+-- 11	109.076817
+-- 9	72.901663
+-- 10	72.423912
+
+select month(date_dim.d_date) as month_no  , sum(catalog_sales.cs_net_paid)/1000000 AS total_sale_in_million
+from catalog_sales
+inner join date_dim on catalog_sales.cs_sold_date_sk = date_dim.d_date_sk
+WHERE YEAR(date_dim.d_date) in (2001,2002)
+group by month(date_dim.d_date)
+order by  total_sale_in_million desc;
+ -- top 3 months 
+-- 12	224.459636
+-- 11	213.467295
+-- 10	145.674669
+
+
+
+
+
 
 
 -- 3. Top 10 Best-Selling Products:

@@ -1,0 +1,17 @@
+{
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "default",
+                "enableSsl": "Disabled"
+            },
+            "previewLimit": 500,
+            "server": "db.relational-data.org",
+            "port": 3306,
+            "driver": "MySQL",
+            "name": "Connection_1",
+            "database": "tpcds",
+            "username": "guest"
+        }
+    ]
+}
